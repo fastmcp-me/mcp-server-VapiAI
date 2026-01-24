@@ -1,7 +1,7 @@
 {
   "name": "@vapi-ai/mcp-server",
-  "description": "Vapi MCP Server",
-  "version": "0.0.9",
+  "description": "Vapi MCP Server - Build AI voice assistants with Claude",
+  "version": "0.0.10",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -30,6 +30,7 @@
     "tool-calling"
   ],
   "bin": {
+    "vapi-mcp": "dist/index.js",
     "@vapi-ai/mcp-server": "dist/index.js"
   },
   "scripts": {
