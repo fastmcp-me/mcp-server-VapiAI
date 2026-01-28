@@ -30,7 +30,6 @@
     "tool-calling"
   ],
   "bin": {
-    "vapi-mcp": "dist/index.js",
     "@vapi-ai/mcp-server": "dist/index.js"
   },
   "scripts": {
