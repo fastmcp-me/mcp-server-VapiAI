@@ -89,7 +89,7 @@ function createMcpServer() {
 
   // Register status tool
   mcpServer.tool(
-    'vapi_status',
+    'vapi_auth_status',
     'Check Vapi authentication status',
     {},
     async () => {

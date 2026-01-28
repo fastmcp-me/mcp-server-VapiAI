@@ -208,7 +208,7 @@ Connect to Vapi's hosted MCP server from any MCP client:
 | Tool | Description |
 |------|-------------|
 | `vapi_login` | Start OAuth flow |
-| `vapi_status` | Check auth status |
+| `vapi_auth_status` | Check auth status |
 
 ---
 
