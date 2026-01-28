@@ -199,7 +199,7 @@ Connect to Vapi's hosted MCP server from any MCP client:
 | Tool | Description |
 |------|-------------|
 | `vapi_login` | Start OAuth flow |
-| `vapi_auth_status` | Check auth status |
+| `vapi_logout` | Log out and clear credentials |
 
 ---
 

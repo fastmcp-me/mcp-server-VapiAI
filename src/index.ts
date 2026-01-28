@@ -3,7 +3,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { VapiClient } from '@vapi-ai/server-sdk';
-import { hasValidToken, getToken, startAuthFlow, isAuthInProgress, getAuthUrl } from './auth.js';
+import { hasValidToken, getToken, startAuthFlow, isAuthInProgress, getAuthUrl, clearConfig } from './auth.js';
 import { registerAllTools } from './tools/index.js';
 
 import dotenv from 'dotenv';
@@ -37,16 +37,24 @@ function createMcpServer() {
     'Authenticate with Vapi. Call this first if other tools return authentication errors.',
     {},
     async () => {
-      // Check if already authenticated
+      // Check if we have a token and validate it
       if (hasValidToken()) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: 'Already authenticated with Vapi! You can now use other Vapi tools.',
-            },
-          ],
-        };
+        try {
+          const client = getVapiClient();
+          await client.assistants.list({ limit: 1 });
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: 'Already authenticated with Vapi! You can now use other Vapi tools.',
+              },
+            ],
+          };
+        } catch {
+          // Token is stale — clear it and restart auth
+          clearConfig();
+          vapiClient = null;
+        }
       }
 
       // Check if auth is already in progress
@@ -56,7 +64,7 @@ function createMcpServer() {
           content: [
             {
               type: 'text' as const,
-              text: `Authentication in progress. Please complete sign-in at:\n\n${url}\n\nAfter signing in, try your request again.`,
+              text: `Authentication in progress. Please complete sign-in:\n\n${url}\n\nAfter signing in, try your request again.`,
             },
           ],
         };
@@ -69,7 +77,7 @@ function createMcpServer() {
           content: [
             {
               type: 'text' as const,
-              text: `Please sign in to Vapi by opening this URL:\n\n${authUrl}\n\nAfter signing in, try your request again.`,
+              text: `Please sign in to Vapi:\n\n${authUrl}\n\nAfter signing in, try your request again.`,
             },
           ],
         };
@@ -87,40 +95,19 @@ function createMcpServer() {
     }
   );
 
-  // Register status tool
+  // Register logout tool
   mcpServer.tool(
-    'vapi_auth_status',
-    'Check Vapi authentication status',
+    'vapi_logout',
+    'Log out of Vapi and clear stored credentials. Use this if your auth token is stale or you want to switch accounts.',
     {},
     async () => {
-      if (hasValidToken()) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: 'Authenticated with Vapi and ready to use.',
-            },
-          ],
-        };
-      }
-
-      if (isAuthInProgress()) {
-        const url = getAuthUrl();
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: `Authentication in progress. Please complete sign-in at:\n\n${url}`,
-            },
-          ],
-        };
-      }
-
+      clearConfig();
+      vapiClient = null;
       return {
         content: [
           {
             type: 'text' as const,
-            text: 'Not authenticated. Use the vapi_login tool to sign in.',
+            text: 'Logged out of Vapi. Use vapi_login to sign in again.',
           },
         ],
       };

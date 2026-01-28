@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as http from 'http';
 import * as crypto from 'crypto';
+import { spawn } from 'child_process';
 
 const CONFIG_DIR = path.join(os.homedir(), '.vapi');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
@@ -54,6 +55,20 @@ export function saveConfig(config: VapiConfig): void {
   } catch (error) {
     console.error('Failed to save config:', error);
   }
+}
+
+/**
+ * Clear stored Vapi configuration and reset in-memory state
+ */
+export function clearConfig(): void {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      fs.unlinkSync(CONFIG_FILE);
+    }
+  } catch (error) {
+    // Ignore errors
+  }
+  cachedConfig = null;
 }
 
 /**
@@ -169,6 +184,7 @@ export function startAuthFlow(): Promise<string> {
       const redirectUri = `http://localhost:${port}/callback`;
       authUrl = `${VAPI_DASHBOARD_URL}/auth/cli?state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
+      openBrowser(authUrl);
       resolve(authUrl);
 
       // Timeout after 10 minutes
@@ -184,6 +200,23 @@ export function startAuthFlow(): Promise<string> {
       reject(err);
     });
   });
+}
+
+function openBrowser(url: string) {
+  try {
+    const cmd = process.platform === 'darwin'
+      ? 'open'
+      : process.platform === 'win32'
+        ? 'start'
+        : 'xdg-open';
+    const child = spawn(cmd, [url], {
+      detached: true,
+      stdio: 'ignore',
+    });
+    child.unref();
+  } catch {
+    // Ignore — URL is still returned in the response as fallback
+  }
 }
 
 function cleanupAuth() {

@@ -39,7 +39,7 @@ Use these guidelines to craft effective voice assistant prompts based on what th
 
 ### Authentication
 - `vapi_login` - Start OAuth authentication flow
-- `vapi_auth_status` - Check if authenticated
+- `vapi_logout` - Log out and clear stored credentials
 
 ### Assistants
 - `vapi_list_assistants` - List all assistants

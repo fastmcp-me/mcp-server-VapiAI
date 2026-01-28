@@ -34,7 +34,7 @@ export function createAuthRequiredResponse(url: string): ToolResponse {
     content: [
       {
         type: 'text' as const,
-        text: `Authentication required. Please sign in at:\n\n${url}\n\nAfter signing in, try your request again.`,
+        text: `Authentication required. Please sign in:\n\n${url}\n\nAfter signing in, try your request again.`,
       },
     ],
     isError: true,
